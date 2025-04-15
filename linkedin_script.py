@@ -14,7 +14,7 @@ load_dotenv()
 
 USERNAME = os.getenv("USERNAME")   
 PASSWORD = os.getenv("PASSWORD")      
-MAX_CONNECTIONS = 60                  
+MAX_CONNECTIONS = 80                  
 
 def login(driver):
     driver.get("https://www.linkedin.com/login")

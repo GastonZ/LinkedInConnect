@@ -21,10 +21,6 @@ Este bot automatiza el envío de solicitudes de conexión en LinkedIn usando Pyt
 
 ### 1. Clonar el repositorio
 
-```bash
-git clone https://github.com/tu-usuario/linkedin-connector-bot.git
-cd linkedin-connector-bot
-
 ### 2. Crear entorno virtual
 
 ## En cmd o PowerShell
