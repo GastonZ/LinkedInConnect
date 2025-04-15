@@ -14,7 +14,7 @@ load_dotenv()
 
 USERNAME = os.getenv("USERNAME")   
 PASSWORD = os.getenv("PASSWORD")      
-MAX_CONNECTIONS = 70                  
+MAX_CONNECTIONS = 60                  
 
 def login(driver):
     driver.get("https://www.linkedin.com/login")
@@ -31,43 +31,40 @@ def connect_from_mynetwork(driver):
 
     connections = 0
     scroll_attempts = 0
-    max_scroll_attempts = 10
-
-    actions = ActionChains(driver)
+    max_scroll_attempts = 20
+    last_height = driver.execute_script("return document.body.scrollHeight")
 
     while connections < MAX_CONNECTIONS and scroll_attempts < max_scroll_attempts:
         buttons = driver.find_elements(By.XPATH, "//span[text()='Conectar' or text()='Connect']/ancestor::button")
 
-        if not buttons:
-            print(f"⚠️ No se encontraron botones. Scroll #{scroll_attempts + 1} con flecha ↓")
-            body = driver.find_element(By.TAG_NAME, "body")
-            for _ in range(10):  # presiona flecha hacia abajo varias veces
-                actions.move_to_element(body).send_keys(Keys.ARROW_DOWN).perform()
-                time.sleep(0.1)
+        if buttons:
+            print(f"🔎 Encontrados {len(buttons)} botones de conexión")
+            for button in buttons:
+                if connections >= MAX_CONNECTIONS:
+                    break
+                try:
+                    driver.execute_script("arguments[0].scrollIntoView(true);", button)
+                    time.sleep(0.5)
+                    driver.execute_script("arguments[0].click();", button)
+                    print(f"[+] Conexión enviada ({connections + 1})")
+                    connections += 1
+                    time.sleep(2)
+                except Exception as e:
+                    print("[-] No se pudo hacer clic en un botón:", e)
+                    continue
+        else:
+            print(f"⚠️ No se encontraron botones. Scroll #{scroll_attempts + 1}")
+
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(3)
+
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:
             scroll_attempts += 1
-            time.sleep(2)
-            continue
+        else:
+            scroll_attempts = 0 
+            last_height = new_height
 
-        print(f"🔎 Encontrados {len(buttons)} botones de conexión")
-        scroll_attempts = 0  # reset si encuentra botones
-
-        for button in buttons:
-            if connections >= MAX_CONNECTIONS:
-                break
-            try:
-                driver.execute_script("arguments[0].click();", button)
-                print(f"[+] Conexión enviada ({connections + 1})")
-                connections += 1
-                time.sleep(2)
-            except Exception as e:
-                print("[-] No se pudo hacer clic en un botón:", e)
-                continue
-
-        # Hacemos scroll después del ciclo también
-        for _ in range(10):
-            actions.send_keys(Keys.ARROW_DOWN).perform()
-            time.sleep(0.05)
-        time.sleep(1.5)
 
 
 
